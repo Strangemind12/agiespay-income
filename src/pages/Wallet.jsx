@@ -1,55 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext'; // ✅ Toast hook
 
 export default function Wallet() {
   const [balance, setBalance] = useState(0);
   const [method, setMethod] = useState('');
   const [walletUID, setWalletUID] = useState('');
-  const [message, setMessage] = useState('');
   const [withdrawals, setWithdrawals] = useState([]);
+  const { showToast } = useToast(); // ✅ Toast trigger
 
   const minWithdraw = 1000;
 
-  // Simulate logged-in user
+  // Simulated user (replace with actual auth user later)
   const user = {
     id: 'user123',
     name: 'Strangemind',
     email: 'strangemind@agiespay.income',
   };
 
-  // 1️⃣ Fetch wallet balance and withdrawals from backend
+  // 1️⃣ Fetch wallet data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch wallet balance
         const balanceRes = await axios.get(`/api/user/${user.id}/balance`);
         setBalance(balanceRes.data.balance);
 
-        // Fetch withdrawal history
         const historyRes = await axios.get(`/api/user/${user.id}/withdrawals`);
         setWithdrawals(historyRes.data);
       } catch (error) {
         console.error("Error fetching wallet data:", error);
+        showToast({ type: 'error', message: '❌ Failed to fetch wallet info' });
       }
     };
 
     fetchData();
   }, []);
 
-  // 2️⃣ Handle withdrawal request
+  // 2️⃣ Handle withdrawal
   const handleWithdraw = async (e) => {
     e.preventDefault();
 
     if (!method || !walletUID) {
-      return setMessage("❌ All fields are required.");
+      return showToast({ type: 'error', message: '❌ All fields are required.' });
     }
 
     if (balance < minWithdraw) {
-      return setMessage("⚠️ You need at least 1,000 coins to withdraw.");
+      return showToast({ type: 'warning', message: '⚠️ You need at least 1,000 coins to withdraw.' });
     }
 
     try {
-      // Send withdrawal request to backend
       await axios.post('/api/withdraw-request', {
         userId: user.id,
         method,
@@ -59,17 +58,16 @@ export default function Wallet() {
         requestedAt: new Date(),
       });
 
-      setMessage("✅ Withdrawal request submitted and pending admin approval.");
+      showToast({ type: 'success', message: '✅ Withdrawal request submitted.' });
       setMethod('');
       setWalletUID('');
 
       // Refresh withdrawal history
       const historyRes = await axios.get(`/api/user/${user.id}/withdrawals`);
       setWithdrawals(historyRes.data);
-
     } catch (err) {
       console.error("Withdrawal error:", err);
-      setMessage("❌ Something went wrong. Try again.");
+      showToast({ type: 'error', message: '❌ Something went wrong. Try again.' });
     }
   };
 
@@ -78,21 +76,12 @@ export default function Wallet() {
       <h1 className="text-2xl font-bold text-green-700 mb-4">💰 Wallet & Withdraw</h1>
       <p className="text-gray-600 mb-4">Logged in as <span className="font-semibold">{user.name}</span></p>
 
+      {/* Balance Display */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
         <h3 className="text-xl font-semibold text-gray-800 mb-2">Current Balance</h3>
         <p className="text-3xl text-green-600 font-bold">{balance} coins</p>
         <p className="text-sm text-gray-500">Minimum withdrawal: 1,000 coins</p>
       </div>
-
-      {message && (
-        <div className={`mb-4 px-4 py-2 rounded text-sm ${
-          message.startsWith('✅') ? 'bg-green-100 text-green-800 border border-green-400' :
-          message.startsWith('⚠️') ? 'bg-yellow-100 text-yellow-800 border border-yellow-400' :
-          'bg-red-100 text-red-800 border border-red-400'
-        }`}>
-          {message}
-        </div>
-      )}
 
       {/* 3️⃣ Withdrawal Form */}
       <form onSubmit={handleWithdraw} className="bg-white rounded-lg shadow p-4 space-y-4 mb-10">
@@ -166,4 +155,4 @@ export default function Wallet() {
       </footer>
     </div>
   );
-}
+  }
