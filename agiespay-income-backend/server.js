@@ -15,6 +15,7 @@ connectDB();
 
 // Routes
 app.use('/api', require('./routes/wallet'));
+app.use('/api', require('./routes/ptc'));        // ✅ Add this line for PTC ads
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/public', require('./routes/public'));
 
