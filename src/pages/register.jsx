@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from '../context/ToastContext'; // ✅ Toast hook import
 
 export default function Register() {
   const navigate = useNavigate();
+  const { showToast } = useToast(); // ✅ Access toast function
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -15,11 +18,28 @@ export default function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // ⚙️ You’ll connect this to backend API later
-    console.log('Registering user:', formData);
-    navigate('/dashboard'); // Simulated login
+
+    const { fullName, email, password, country } = formData;
+
+    // Simple client-side validation
+    if (!fullName || !email || !password || !country) {
+      return showToast({ type: 'error', message: '⚠️ Please fill all required fields.' });
+    }
+
+    try {
+      // Simulated backend request – replace this with actual Supabase or API call
+      console.log('Registering user:', formData);
+
+      showToast({ type: 'success', message: '✅ Account created successfully!' });
+
+      // Navigate after successful register
+      setTimeout(() => navigate('/dashboard'), 1000);
+    } catch (err) {
+      console.error('Registration failed:', err);
+      showToast({ type: 'error', message: '❌ Something went wrong. Try again.' });
+    }
   };
 
   return (
@@ -83,7 +103,9 @@ export default function Register() {
             </select>
           </div>
           <div>
-            <label className="block mb-1 font-semibold text-gray-700">Referral Code <span className="text-gray-500">(optional)</span></label>
+            <label className="block mb-1 font-semibold text-gray-700">
+              Referral Code <span className="text-gray-500">(optional)</span>
+            </label>
             <input
               type="text"
               name="referralCode"
