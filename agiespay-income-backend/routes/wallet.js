@@ -8,8 +8,8 @@ router.get('/user/:userId/balance', async (req, res) => {
   try {
     const userId = req.params.userId;
     
-    // TODO: Replace this with real wallet logic (e.g., DB lookup or calculation)
-    const balance = 1500; // Dummy static balance
+    // TODO: Replace with real DB logic or Supabase fetch
+    const balance = 1500; // Temporary static value
 
     res.json({ balance });
   } catch (error) {
@@ -22,12 +22,17 @@ router.post('/withdraw-request', async (req, res) => {
   try {
     const { userId, method, walletUID, amount } = req.body;
 
+    if (!userId || !method || !walletUID || !amount) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
     const newRequest = new Withdrawal({
       userId,
       method,
       walletUID,
       amount,
       status: 'pending',
+      requestedAt: new Date(),
     });
 
     await newRequest.save();
