@@ -1,9 +1,22 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
-  const user = {
-    name: "Strangemind", // 🧠 Replace later with actual user state
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');  // 🔐 Protect page if not logged in
+    }
+  }, [user, loading]);
+
+  if (loading || !user) return null;
+
+  // You can later fetch real coins/referrals from Supabase
+  const mockUser = {
+    name: user.email.split('@')[0],
     coins: 2850,
     referrals: 12,
     country: "🇳🇬",
@@ -14,7 +27,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-blue-700">
-          Welcome back, {user.name} 👋
+          Welcome back, {mockUser.name} 👋
         </h1>
         <p className="text-sm text-gray-600">Dashboard Overview — Agiespay Income</p>
       </div>
@@ -23,12 +36,12 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="text-gray-600 font-semibold mb-1">💰 Coins Balance</h3>
-          <p className="text-3xl font-bold text-green-600">{user.coins} coins</p>
+          <p className="text-3xl font-bold text-green-600">{mockUser.coins} coins</p>
           <p className="text-xs text-gray-400 mt-1">Minimum payout: 1,000 coins</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="text-gray-600 font-semibold mb-1">👥 Referrals</h3>
-          <p className="text-3xl font-bold text-purple-600">{user.referrals}</p>
+          <p className="text-3xl font-bold text-purple-600">{mockUser.referrals}</p>
           <p className="text-xs text-gray-400 mt-1">Invite friends to earn 10% bonus</p>
         </div>
       </div>
@@ -78,4 +91,4 @@ export default function Dashboard() {
       </footer>
     </div>
   );
-}
+          }
