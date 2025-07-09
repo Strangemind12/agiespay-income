@@ -6,6 +6,7 @@ const connectDB = require('./db');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimiter = require('./middleware/rateLimiter');
+const path = require('path');
 
 dotenv.config();
 const app = express();
@@ -43,8 +44,16 @@ app.use('/api', walletRoutes);
 app.use('/api', ptcRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
-app.use('/api', clickTrackRoutes);      // <-- NEW
-app.use('/api', cooldownRoutes);        // <-- NEW
+app.use('/api', clickTrackRoutes);
+app.use('/api', cooldownRoutes);
+
+// Serve React build files statically from frontend/dist
+app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+
+// For any route NOT handled by your API routes, send back index.html (for React Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '..', 'frontend', 'dist', 'index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
