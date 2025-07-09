@@ -2,7 +2,3 @@
   base = "frontend"
   publish = "dist"
   command = "npm run build"
-
-[build.environment]
-  VITE_SUPABASE_URL = "https://your-project.supabase.co"
-  VITE_SUPABASE_ANON_KEY = "your-key"
