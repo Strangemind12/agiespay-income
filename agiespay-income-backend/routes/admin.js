@@ -4,7 +4,7 @@ const Withdrawal = require('../models/Withdrawal');
 const SiteContent = require('../models/SiteContent');
 const User = require('../models/User');
 const Alert = require('../models/Alert');
-const authAdmin = require('../middleware/authAdmin'); // Make sure this middleware exists and works with Supabase user
+const authAdmin = require('../middleware/authAdmin'); // Middleware that validates Supabase user as admin
 
 // Protect all admin routes
 router.use(authAdmin);
@@ -66,7 +66,6 @@ router.post('/site-content', async (req, res) => {
 // User Management (Ban, Unban, Block, Unblock, Delete)
 // ---------------------------------
 
-// Ban user
 router.post('/ban/:userId', async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.userId, { isBanned: true }, { new: true });
@@ -81,7 +80,6 @@ router.post('/ban/:userId', async (req, res) => {
   }
 });
 
-// Unban user
 router.post('/unban/:userId', async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.userId, { isBanned: false }, { new: true });
@@ -94,7 +92,6 @@ router.post('/unban/:userId', async (req, res) => {
   }
 });
 
-// Block user
 router.post('/block/:userId', async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.userId, { isBlocked: true }, { new: true });
@@ -109,7 +106,6 @@ router.post('/block/:userId', async (req, res) => {
   }
 });
 
-// Unblock user
 router.post('/unblock/:userId', async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.userId, { isBlocked: false }, { new: true });
@@ -122,7 +118,6 @@ router.post('/unblock/:userId', async (req, res) => {
   }
 });
 
-// Delete user
 router.delete('/delete/:userId', async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.userId);
@@ -141,7 +136,6 @@ router.delete('/delete/:userId', async (req, res) => {
 // Alert Management for Admin Review
 // ---------------------------------
 
-// List alerts (latest 50)
 router.get('/alerts', async (req, res) => {
   try {
     const alerts = await Alert.find().sort({ createdAt: -1 }).limit(50);
@@ -152,7 +146,6 @@ router.get('/alerts', async (req, res) => {
   }
 });
 
-// Mark alert resolved
 router.post('/alerts/:alertId/resolve', async (req, res) => {
   try {
     const alert = await Alert.findByIdAndUpdate(req.params.alertId, { resolved: true }, { new: true });
