@@ -35,12 +35,16 @@ const walletRoutes = require('./routes/wallet');
 const ptcRoutes = require('./routes/ptc');
 const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');
+const clickTrackRoutes = require('./routes/clickTrack');    // <-- NEW
+const cooldownRoutes = require('./routes/cooldowns');       // <-- NEW
 
 // Routes with middleware where needed
 app.use('/api', walletRoutes);
 app.use('/api', ptcRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api', clickTrackRoutes);      // <-- NEW
+app.use('/api', cooldownRoutes);        // <-- NEW
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
