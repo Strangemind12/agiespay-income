@@ -1,0 +1,9 @@
+# Netlify build settings for Agiespay-Income frontend
+[build]
+  base = "frontend"            # ⬅️ Go into this folder
+  publish = "frontend/dist"    # ⬅️ This is where Vite outputs the final site
+  command = "npm run build"    # ⬅️ Build command
+
+[build.environment]
+  VITE_SUPABASE_URL = "https://your-project-id.supabase.co"      # ⬅️ Replace this with your actual Supabase URL
+  VITE_SUPABASE_ANON_KEY = "your-anon-key-here"                  # ⬅️ Replace this with your real anon key
