@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext'; // ✅ use real user from auth
 
 export default function ClickToEarn() {
   const [ads, setAds] = useState([]);
   const [clickedAds, setClickedAds] = useState([]);
-  const { showToast } = useToast();
+  const [loading, setLoading] = useState(true);
 
-  const user = {
-    id: 'user123',
-    name: 'Strangemind',
-    email: 'strangemind@agiespay.income',
-  };
+  const { user, session } = useAuth(); // 🔐 Get user and token
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchAds = async () => {
@@ -22,6 +20,7 @@ export default function ClickToEarn() {
         console.error("Error fetching ads:", err);
         showToast({ type: 'error', message: '❌ Failed to load ads.' });
       }
+      setLoading(false);
     };
 
     fetchAds();
@@ -33,11 +32,21 @@ export default function ClickToEarn() {
     }
 
     try {
-      await axios.post('/api/click-track', {
-        userId: user.id,
-        adId: ad.id,
-        clickedAt: new Date(),
-      });
+      const token = session?.access_token || sessionStorage.getItem('access_token');
+
+      await axios.post(
+        '/api/click-track',
+        {
+          userId: user.id,
+          adId: ad.id,
+          clickedAt: new Date(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       setClickedAds((prev) => [...prev, ad.id]);
       showToast({ type: 'success', message: `✅ You earned ${ad.reward} coins!` });
@@ -52,7 +61,9 @@ export default function ClickToEarn() {
       <h1 className="text-2xl font-bold text-blue-700 mb-4">🖱️ Click & Earn (PTC Ads)</h1>
       <p className="text-gray-600 mb-6">View sponsored ads and earn instant coins. Simple as that.</p>
 
-      {ads.length === 0 ? (
+      {loading ? (
+        <p className="text-gray-500 text-sm">🔄 Loading ads...</p>
+      ) : ads.length === 0 ? (
         <p className="text-sm text-gray-500">No ads available right now. Check back later.</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
