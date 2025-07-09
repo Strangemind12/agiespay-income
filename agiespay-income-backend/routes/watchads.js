@@ -3,6 +3,9 @@ const express = require('express');
 const router = express.Router();
 const WatchAdClick = require('../models/WatchAdClick');
 
+const detectSuspiciousUser = require('../middleware/detectSuspiciousUser');
+const verifyCaptcha = require('../middleware/verifyCaptcha');
+
 // 📺 [GET] Public: All video ads
 router.get('/watchads', async (req, res) => {
   try {
@@ -41,5 +44,30 @@ router.post('/click-watchad', async (req, res) => {
     res.status(500).json({ error: 'Could not record watch click' });
   }
 });
+
+// 🧠 [POST] Protected Reward Claim — Suspicious detection + CAPTCHA
+router.post(
+  '/watch/claim-video',
+  detectSuspiciousUser,
+  async (req, res, next) => {
+    if (req.suspicious) {
+      return verifyCaptcha(req, res, next);
+    }
+    next();
+  },
+  async (req, res) => {
+    const { userId, adId } = req.body;
+
+    if (!userId || !adId) {
+      return res.status(400).json({ error: 'Missing userId or adId' });
+    }
+
+    // 🚀 Future logic: cooldown check, reward awarding
+    // await grantVideoReward(userId, adId);
+
+    console.log(`🎥 Reward granted for user ${userId} watching ad ${adId}`);
+    res.json({ message: 'Video reward granted.' });
+  }
+);
 
 module.exports = router;
