@@ -7,7 +7,8 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import Wallet from './pages/Wallet'; // ✅ Import Wallet page
+import Wallet from './pages/Wallet';
+import ClickToEarn from './pages/ClickToEarn';  // <-- Added this import
 
 export default function App() {
   return (
@@ -30,6 +31,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Wallet />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/click"
+            element={
+              <ProtectedRoute>
+                <ClickToEarn />
               </ProtectedRoute>
             }
           />
