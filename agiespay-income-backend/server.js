@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -7,6 +6,9 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimiter = require('./middleware/rateLimiter');
 const path = require('path');
+
+// Import your Supabase auth middleware
+const { authSupabase, checkUserStatus, checkAdmin } = require('./middleware/authSupabase');
 
 dotenv.config();
 const app = express();
@@ -36,16 +38,24 @@ const walletRoutes = require('./routes/wallet');
 const ptcRoutes = require('./routes/ptc');
 const adminRoutes = require('./routes/admin');
 const publicRoutes = require('./routes/public');
-const clickTrackRoutes = require('./routes/clickTrack');    // <-- NEW
-const cooldownRoutes = require('./routes/cooldowns');       // <-- NEW
+const clickTrackRoutes = require('./routes/clickTrack');
+const cooldownRoutes = require('./routes/cooldowns');
 
-// Routes with middleware where needed
+// Mount public/general routes WITHOUT extra auth middleware
 app.use('/api', walletRoutes);
 app.use('/api', ptcRoutes);
-app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api', clickTrackRoutes);
 app.use('/api', cooldownRoutes);
+
+// *** Mount admin routes WITH your Supabase auth middleware stack ***
+app.use(
+  '/api/admin',
+  authSupabase,       // Verify Supabase token/session
+  checkUserStatus,    // Check if user is active/not banned etc.
+  checkAdmin,         // Verify user has admin privileges
+  adminRoutes         // Finally, mount your admin route handlers
+);
 
 // Serve React build files statically from frontend/dist
 app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
