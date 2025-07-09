@@ -1,58 +1,37 @@
-import React, { useContext } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider, AuthContext } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import React, { createContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase'; // adjust path if needed
 
-import Navbar from './components/Navbar';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Wallet from './pages/Wallet';
-import ClickToEarn from './pages/ClickToEarn';
+export const AuthContext = createContext();
 
-function AppRoutes() {
-  const { user } = useContext(AuthContext); // assuming your AuthContext provides `user`
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a spinner
+  }
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/wallet"
-        element={
-          <ProtectedRoute>
-            <Wallet />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/clicktoearn"
-        element={
-          <ProtectedRoute>
-            <ClickToEarn user={user} />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
-  );
-}
-
-export default function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Navbar />
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
+    <AuthContext.Provider value={{ user, setUser }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
