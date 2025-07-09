@@ -1,26 +1,28 @@
-// src/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastProvider } from './context/ToastContext';  // ✅ Add this
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
+import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-// Add your other pages...
 
-function App() {
+export default function App() {
   return (
-    <ToastProvider> {/* ✅ Wrap the app here */}
-      <Router>
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          {/* Add other routes... */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
-      </Router>
-    </ToastProvider>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
-
-export default App;
