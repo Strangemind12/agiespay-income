@@ -1,21 +1,35 @@
-// middleware/authAdmin.js
-const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
 
-module.exports = function (req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY // Use anon key here for user token verification
+);
 
-  const token = authHeader.split(' ')[1]; // Expecting "Bearer TOKEN"
-  if (!token) return res.status(401).json({ error: 'No token provided' });
-
+module.exports = async function adminAuth(req, res, next) {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.email !== 'admin@agiespay.income') {
-      return res.status(403).json({ error: 'Forbidden: Admins only' });
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Unauthorized: No token provided' });
     }
-    req.user = decoded;
+
+    const token = authHeader.split(' ')[1];
+
+    const { data, error } = await supabase.auth.getUser(token);
+
+    if (error || !data.user) {
+      return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+    }
+
+    const user = data.user;
+
+    if (user.email !== 'admin@agiespay.income') {
+      return res.status(403).json({ message: 'Forbidden: Admins only' });
+    }
+
+    req.user = user;
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Invalid token' });
+    console.error('Admin auth error:', err);
+    res.status(401).json({ message: 'Unauthorized: Authentication failed' });
   }
 };
