@@ -1,4 +1,4 @@
-import ClickToEarn from './page/ClickToEarn';
+import ClickToEarn from './pages/ClickToEarn';
 
 // Inside <Routes>:
 <Route
