@@ -2,26 +2,26 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import LoadingSpinner from './LoadingSpinner'; // 👈 Import fancy loader
+import LoadingSpinner from './LoadingSpinner'; // ✅ Fancy loader
 
 export default function AdminRoute({ children }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth(); // 👈 bring in loading
 
-  // ⏳ Still loading user data?
-  if (user === null) {
+  // ⏳ Still fetching user?
+  if (loading) {
     return <LoadingSpinner />;
   }
 
-  // 🔐 Not logged in? Send 'em to login
+  // 🚪 Not logged in? Bye
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // 🧢 Logged in but not an admin? Get outta here
+  // 🧢 Not an admin? Block access
   if (user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
-  // ✅ All clear
+  // ✅ Admin verified
   return children;
 }
