@@ -1,15 +1,43 @@
+// 📍 src/pages/LoginPage.jsx
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
-export default function Login() {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Logging in with:", email, password);
-    navigate("/dashboard"); // temporary redirect
+
+    if (!email || !password) {
+      return showToast({
+        type: 'error',
+        message: '⚠️ Please fill in both email and password.'
+      });
+    }
+
+    try {
+      await login(email, password);
+
+      showToast({
+        type: 'success',
+        message: '✅ Login successful! Redirecting...'
+      });
+
+      setTimeout(() => navigate('/dashboard'), 1000);
+    } catch (err) {
+      console.error('Login failed:', err);
+      showToast({
+        type: 'error',
+        message: '❌ Invalid email or password. Try again.'
+      });
+    }
   };
 
   return (
