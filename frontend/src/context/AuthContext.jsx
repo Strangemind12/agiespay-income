@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch profile details (e.g., role)
+  // 🔍 Fetch extended user profile (e.g., role)
   const fetchUserProfile = async (sessionUser) => {
     try {
       const { data, error } = await supabase
@@ -23,14 +23,14 @@ export function AuthProvider({ children }) {
         return sessionUser; // fallback to basic session user
       }
 
-      return { ...sessionUser, ...data }; // ✅ Merge role into user
+      return { ...sessionUser, ...data }; // 🧠 Merge Supabase auth and profile
     } catch (err) {
       console.error('Unexpected error fetching profile:', err);
       return sessionUser;
     }
   };
 
-  // ✅ On load, get session and user profile
+  // 🚀 On load: grab session and profile
   useEffect(() => {
     const loadUser = async () => {
       const {
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
 
     loadUser();
 
-    // ✅ Listen for login/logout and update user
+    // 🔁 Listen to auth changes
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const userWithProfile = await fetchUserProfile(session.user);
@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // ✅ Auth functions
+  // 🔐 Auth actions
   const login = async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
@@ -81,8 +81,8 @@ export function AuthProvider({ children }) {
   };
 
   return (
-<AuthContext.Provider value={{ user, loading, login, register, logout }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+      {children} {/* ✅ Always render children, let components handle loading */}
     </AuthContext.Provider>
   );
 }
