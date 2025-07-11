@@ -3,13 +3,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
+// 🎯 Create the context
 const AuthContext = createContext();
 
+// 🌍 Provider to wrap your app
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔍 Fetch extended user profile (e.g., role)
+  // 🔍 Fetch user profile from Supabase
   const fetchUserProfile = async (sessionUser) => {
     try {
       const { data, error } = await supabase
@@ -20,17 +22,17 @@ export function AuthProvider({ children }) {
 
       if (error) {
         console.warn('Profile fetch error:', error.message);
-        return sessionUser; // fallback to basic session user
+        return sessionUser; // fallback to session-only data
       }
 
-      return { ...sessionUser, ...data }; // 🧠 Merge Supabase auth and profile
+      return { ...sessionUser, ...data }; // 🧠 Merge user session + profile
     } catch (err) {
-      console.error('Unexpected error fetching profile:', err);
+      console.error('Unexpected error:', err);
       return sessionUser;
     }
   };
 
-  // 🚀 On load: grab session and profile
+  // 🚀 On app load
   useEffect(() => {
     const loadUser = async () => {
       const {
@@ -49,7 +51,7 @@ export function AuthProvider({ children }) {
 
     loadUser();
 
-    // 🔁 Listen to auth changes
+    // 🔁 Listen to auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const userWithProfile = await fetchUserProfile(session.user);
@@ -59,12 +61,10 @@ export function AuthProvider({ children }) {
       }
     });
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  // 🔐 Auth actions
+  // 🛠 Auth actions
   const login = async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
@@ -80,11 +80,21 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // 📦 Context value
+  const value = {
+    user,
+    loading,
+    login,
+    register,
+    logout,
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
-      {children} {/* ✅ Always render children, let components handle loading */}
+    <AuthContext.Provider value={value}>
+      {children}
     </AuthContext.Provider>
   );
 }
 
+// 💡 Hook for easy context use
 export const useAuth = () => useContext(AuthContext);
