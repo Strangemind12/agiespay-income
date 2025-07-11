@@ -1,11 +1,10 @@
-// src/App.jsx
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
-import AdminSettings from './pages/AdminSettings'; // ✅ Import it here
+import AdminSettings from './pages/AdminSettings';
+import AdminRoute from './components/AdminRoute'; // ✅ This is your protection layer
 
 function App() {
   return (
@@ -14,7 +13,14 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/admin/settings" element={<AdminSettings />} /> {/* ✅ Add this */}
+          <Route
+            path="/admin/settings"
+            element={
+              <AdminRoute>
+                <AdminSettings />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
