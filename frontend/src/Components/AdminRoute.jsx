@@ -1,21 +1,27 @@
+// 📍 src/components/AdminRoute.jsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LoadingSpinner from './LoadingSpinner'; // 👈 Import fancy loader
 
 export default function AdminRoute({ children }) {
-  const { user, loading } = useAuth(); // ← We now grab loading too
+  const { user } = useAuth();
 
-  if (loading) {
-    return <div className="text-center py-10 text-gray-500">Loading...</div>; // ← Show this while waiting
+  // ⏳ Still loading user data?
+  if (user === null) {
+    return <LoadingSpinner />;
   }
 
+  // 🔐 Not logged in? Send 'em to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
+  // 🧢 Logged in but not an admin? Get outta here
   if (user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
+  // ✅ All clear
   return children;
 }
