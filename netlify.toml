@@ -1,4 +1,8 @@
 [build]
   base = "frontend"
-  publish = "dist"
+  publish = "frontend/dist"
   command = "npm run build"
+
+[build.environment]
+  VITE_SUPABASE_URL = "your_supabase_url"
+  VITE_SUPABASE_ANON_KEY = "your_anon_key"
