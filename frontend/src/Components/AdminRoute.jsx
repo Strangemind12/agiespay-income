@@ -25,3 +25,4 @@ export default function AdminRoute({ children }) {
   // ✅ Admin verified
   return children;
 }
+  
