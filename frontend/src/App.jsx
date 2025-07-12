@@ -9,8 +9,7 @@ import LoginPage from './pages/LoginPage';
 import AdminSettings from './pages/AdminSettings';
 
 // ✅ Route Guards
-import AdminRoute from './components/AdminRoute'; // 🔐 Ensure this file is named EXACTLY: AdminRoute.jsx
-
+import AdminRoute from './components/AdminRoute.jsx';
 function App() {
   return (
     <AuthProvider>
