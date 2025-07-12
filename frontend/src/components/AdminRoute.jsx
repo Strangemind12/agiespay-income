@@ -1,28 +1,29 @@
-// 📍 src/components/AdminRoute.jsx
+// 📍 frontend/src/components/AdminRoute.jsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from './LoadingSpinner'; // ✅ Fancy loader
 
 export default function AdminRoute({ children }) {
-  const { user, loading } = useAuth(); // 👈 bring in loading
+  const { user, loading } = useAuth();
 
-  // ⏳ Still fetching user?
+  // ⏳ Wait if auth is still loading
   if (loading) {
     return <LoadingSpinner />;
   }
 
-  // 🚪 Not logged in? Bye
+  // 🚪 Not logged in? Send to login page
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // 🧢 Not an admin? Block access
+  // 🧢 Not an admin? Send to home
   if (user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
-  // ✅ Admin verified
+  // ✅ Access granted to admin
   return children;
 }
+
 
