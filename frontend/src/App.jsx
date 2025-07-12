@@ -5,7 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import AdminSettings from './pages/AdminSettings';
-import AdminRoute from './components/AdminRoute'; // ✅ This is your admin lock
+import AdminRoute from './components/AdminRoute';
 
 function App() {
   return (
